@@ -5,26 +5,41 @@
  */
 package net.htlgrieskirchen.pos3.pcp;
 
+import java.util.ArrayList;
 import java.util.List;
 
+public class Consumer implements Runnable {
 
-public class Consumer /* implement this */ {
     private final String name;
     private final Storage storage;
     private final int sleepTime;
-    
+
     private final List<Integer> received;
     private boolean running;
-    
+
     public Consumer(String name, Storage storage, int sleepTime) {
-        // implement this
+        this.name = name;
+        this.storage = storage;
+        this.sleepTime = sleepTime;
+        received = new ArrayList<>();
     }
- 
-    // implement this
 
     public List<Integer> getReceived() {
-        // implement this
-        return null;
+        return received;
+    }
+
+    @Override
+    public void run() {
+        while (!storage.isProductionComplete() || storage.getStoredCounter() != storage.getFetchedCounter()) {
+            try {
+                Integer number = storage.get();
+                if (number != null) {
+                    received.add(number);
+                }
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException ex) {
+                System.out.println("InterruptedException");
+            }
+        }
     }
 }
-

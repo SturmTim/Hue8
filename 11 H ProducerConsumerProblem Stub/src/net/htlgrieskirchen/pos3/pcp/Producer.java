@@ -5,25 +5,46 @@
  */
 package net.htlgrieskirchen.pos3.pcp;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Producer /* implement this */ {
+public class Producer implements Runnable {
+
     private final String name;
     private final Storage storage;
     private final int sleepTime;
-    
+
     private final List<Integer> sent;
     private final int numberOfItems;
-    
+
     public Producer(String name, Storage storage, int sleepTime, int numberOfItems) {
-       // implement this
+        this.name = name;
+        this.storage = storage;
+        this.sleepTime = sleepTime;
+        this.numberOfItems = numberOfItems;
+        sent = new ArrayList<>(numberOfItems);
     }
- 
-    // implement this
 
     public List<Integer> getSent() {
-        // implement this
-        return null;
+        return sent;
     }
-    
+
+    @Override
+    public void run() {
+        int numbersSent = 0;
+        while (numbersSent < numberOfItems) {
+            try {
+                if (storage.put(numbersSent)) {
+                    sent.add(numbersSent);
+                    numbersSent++;
+                } else {
+                    Thread.sleep(sleepTime);
+                }
+            } catch (InterruptedException e) {
+                System.out.println("InterruptedException");
+            }
+        }
+        storage.setProductionComplete();
+    }
+
 }
